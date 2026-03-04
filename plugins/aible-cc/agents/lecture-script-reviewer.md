@@ -18,7 +18,7 @@ tools: Read, Grep, Glob
 위임 메시지에 다음이 포함됩니다:
 
 1. **슬라이드 설명 파일 경로**: `lectures/{강의명}/assets/slide_{n}_desc.md` (근거 자료)
-2. **스크립트 파일 경로**: `lectures/{강의명}/scripts/{n}_script.md` (평가 대상)
+2. **스크립트 파일 경로**: `lectures/{강의명}/scripts.md` (평가 대상, `# 슬라이드 N` 섹션으로 구분)
 3. **강의 맥락**: 대상 청중, 톤/스타일, 강의 목적
 
 ### 출력 형식 (필수)

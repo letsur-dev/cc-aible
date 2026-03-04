@@ -109,9 +109,7 @@ lectures/<강의 제목>/
 │   ├── slide_1.png
 │   ├── slide_1_desc.md
 │   └── ...
-├── scripts/
-│   ├── 1_script.md
-│   └── ...
+├── scripts.md          ← 전체 스크립트 (슬라이드별 섹션)
 └── metadata.json
 ```
 
