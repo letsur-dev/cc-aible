@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent(storyline-writer)",
+      "Agent(storyline-reviewer)",
+      "Agent(storyline-red-team)",
+      "Agent(lecture-script-describer)",
+      "Agent(lecture-script-writer)",
+      "Agent(lecture-script-reviewer)",
+      "Agent(lecture-script-red-team)",
+      "Bash(node:${CLAUDE_PLUGIN_ROOT}/scripts/*)"
+    ]
+  }
+}
