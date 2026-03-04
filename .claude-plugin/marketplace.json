@@ -1,0 +1,22 @@
+{
+  "name": "claude-code-ax",
+  "owner": {
+    "name": "Donghyun Nam"
+  },
+  "metadata": {
+    "description": "에이블캠퍼스 AX 플러그인 마켓플레이스",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "aible-cc",
+      "source": "./plugins/aible-cc",
+      "description": "강의 스토리라인 및 스크립트 생성 워크플로우 (인터뷰 → 작성 → 리뷰 → 레드팀 → 승인)",
+      "version": "0.1.0",
+      "category": "education",
+      "author": {
+        "name": "Donghyun Nam"
+      }
+    }
+  ]
+}
