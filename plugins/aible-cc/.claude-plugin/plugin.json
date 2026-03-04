@@ -5,6 +5,14 @@
   "author": {
     "name": "Donghyun Nam"
   },
-  "agents": "./agents/",
-  "commands": "./commands/"
+  "agents": [
+    "./agents/storyline-writer.md",
+    "./agents/storyline-reviewer.md",
+    "./agents/storyline-red-team.md",
+    "./agents/lecture-script-describer.md",
+    "./agents/lecture-script-writer.md",
+    "./agents/lecture-script-reviewer.md",
+    "./agents/lecture-script-red-team.md"
+  ],
+  "commands": ["./commands/storyline.md", "./commands/lecture-script.md"]
 }
