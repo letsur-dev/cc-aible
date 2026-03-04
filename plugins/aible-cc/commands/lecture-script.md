@@ -43,7 +43,13 @@ Bash 도구를 사용하여 다음을 실행하세요:
 node "${CLAUDE_PLUGIN_ROOT}/scripts/download-slides.mjs" "<Google Slides URL>"
 ```
 
-**사전 조건**: `GOOGLE_ACCESS_TOKEN` 또는 `GOOGLE_APPLICATION_CREDENTIALS` 환경변수가 설정되어 있어야 합니다. 설정되어 있지 않으면 사용자에게 안내하세요.
+**인증은 스크립트가 자동으로 처리합니다:**
+
+- 기존 인증 정보(.env 또는 환경변수)가 있으면 바로 사용
+- 없으면 브라우저가 열려 Google 로그인을 안내하고, 완료되면 refresh token을 .env에 자동 저장
+- 이후 실행부터는 저장된 refresh token으로 자동 인증
+
+스크립트가 `Error: OAuth denied` 등으로 실패하면 사용자에게 에러 메시지를 전달하고 재시도 여부를 확인하세요.
 
 ### 결과 처리
 

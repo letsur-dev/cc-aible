@@ -5,22 +5,85 @@
  * Requires Node.js 18+ (native fetch). Zero npm dependencies.
  */
 
-import { createSign } from 'node:crypto';
-import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { createSign, randomUUID } from 'node:crypto';
+import { readFileSync, mkdirSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { exec as execCb } from 'node:child_process';
+import { promisify } from 'node:util';
+import { platform } from 'node:os';
+
+// User-level config directory for persisting credentials across projects
+const USER_CONFIG_DIR = resolve(homedir(), '.config', 'aible-cc');
+
+const execAsync = promisify(execCb);
+
+// ---------------------------------------------------------------------------
+// OAuth server configuration
+// ---------------------------------------------------------------------------
+const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'https://aible-plugins.duckdns.org';
+const AUTH_POLL_INTERVAL_MS = 2000;
+const AUTH_POLL_TIMEOUT_MS = 300000; // 5 minutes
+
+// ---------------------------------------------------------------------------
+// .env file loading (zero-dependency)
+// ---------------------------------------------------------------------------
+
+/**
+ * Parses a .env file and sets process.env values.
+ * Does not override already-set environment variables.
+ * @param {string} envPath
+ */
+function parseEnvFile(envPath) {
+  if (!existsSync(envPath)) return false;
+  const content = readFileSync(envPath, 'utf8');
+  let loaded = false;
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    let value = trimmed.slice(eqIdx + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (!process.env[key]) {
+      process.env[key] = value;
+      loaded = true;
+    }
+  }
+  if (loaded) process.stderr.write(`Loaded credentials from ${envPath}\n`);
+  return loaded;
+}
+
+/**
+ * Loads .env files in priority order:
+ * 1. User-level (~/.config/aible-cc/.env) — shared across all projects
+ * 2. Project-level (./.env) — project-specific override
+ */
+function loadEnvFiles() {
+  parseEnvFile(resolve(USER_CONFIG_DIR, '.env'));
+  parseEnvFile(resolve(process.cwd(), '.env'));
+}
+
+loadEnvFiles();
 
 const HELP_TEXT = `Usage: node scripts/download-slides.mjs <google-slides-url-or-id> [options]
 
 Downloads slide images from a Google Slides presentation.
 
-Environment variables (checked in priority order):
-  1. OAuth Refresh Token:
-     GOOGLE_OAUTH_CLIENT_ID        OAuth2 client ID
-     GOOGLE_OAUTH_CLIENT_SECRET    OAuth2 client secret
-     GOOGLE_OAUTH_REFRESH_TOKEN    OAuth2 refresh token
-  2. GOOGLE_SLIDES_ACCESS_TOKEN    Pre-resolved access token
-  3. GOOGLE_SERVICE_ACCOUNT_JSON   Service account JSON as string
-  4. GOOGLE_APPLICATION_CREDENTIALS Path to service account JSON key file
+Authentication (checked in priority order):
+  1. Environment variables (any of the below):
+     GOOGLE_OAUTH_CLIENT_ID + SECRET + REFRESH_TOKEN
+     GOOGLE_SLIDES_ACCESS_TOKEN
+     GOOGLE_SERVICE_ACCOUNT_JSON
+     GOOGLE_APPLICATION_CREDENTIALS
+  2. Saved refresh token (~/.config/aible-cc/.env from previous login)
+  3. Interactive OAuth via server: opens browser for Google login (first-time)
+
+Credentials are saved to ~/.config/aible-cc/.env (user-level, shared across projects).
 
 Output:
   lectures/{title}/assets/slide_{n}.png   Slide thumbnail images
@@ -51,7 +114,7 @@ function extractPresentationId(input) {
 
 /**
  * Resolves the active authentication mode from environment variables.
- * Priority: refresh-token > static-access-token > service-account-json > application-credentials
+ * Priority: user-refresh > static-access-token > service-account > server-refresh > server-interactive
  * @returns {string} auth mode identifier
  */
 function resolveAuthMode() {
@@ -66,7 +129,10 @@ function resolveAuthMode() {
   if (has(process.env.GOOGLE_SLIDES_ACCESS_TOKEN)) return 'access-token';
   if (has(process.env.GOOGLE_SERVICE_ACCOUNT_JSON)) return 'service-account-json';
   if (has(process.env.GOOGLE_APPLICATION_CREDENTIALS)) return 'application-credentials';
-  return 'none';
+  // Saved refresh token — exchange via OAuth server
+  if (has(process.env.GOOGLE_OAUTH_REFRESH_TOKEN)) return 'server-refresh';
+  // No credentials — interactive login via OAuth server
+  return 'server-interactive';
 }
 
 /**
@@ -84,14 +150,10 @@ async function getAccessToken() {
       return getServiceAccountTokenFromJson(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
     case 'application-credentials':
       return getServiceAccountTokenFromFile(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-    default:
-      throw new Error(
-        'No credentials found. Set one of:\n' +
-        '  - GOOGLE_OAUTH_CLIENT_ID + GOOGLE_OAUTH_CLIENT_SECRET + GOOGLE_OAUTH_REFRESH_TOKEN\n' +
-        '  - GOOGLE_SLIDES_ACCESS_TOKEN\n' +
-        '  - GOOGLE_SERVICE_ACCOUNT_JSON\n' +
-        '  - GOOGLE_APPLICATION_CREDENTIALS'
-      );
+    case 'server-refresh':
+      return getServerRefreshAccessToken();
+    case 'server-interactive':
+      return serverInteractiveOAuthFlow();
   }
 }
 
@@ -197,6 +259,140 @@ async function exchangeServiceAccountJwt(key) {
 /** @param {string} str @returns {string} */
 function base64url(str) {
   return Buffer.from(str).toString('base64url');
+}
+
+// ---------------------------------------------------------------------------
+// Server-based OAuth flow (https://aible-plugins.duckdns.org)
+// ---------------------------------------------------------------------------
+
+/**
+ * Exchanges a saved refresh token via the OAuth server.
+ * Falls back to interactive flow if the refresh token is expired/revoked.
+ * @returns {Promise<string>} access token
+ */
+async function getServerRefreshAccessToken() {
+  const resp = await fetch(`${AUTH_SERVER_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN }),
+  });
+  if (!resp.ok) {
+    process.stderr.write('Warning: Saved refresh token failed. Starting interactive login...\n');
+    return serverInteractiveOAuthFlow();
+  }
+  const data = await resp.json();
+  if (!data.access_token) throw new Error('Server refresh response missing access_token');
+  return data.access_token;
+}
+
+/**
+ * Runs an interactive OAuth flow via the remote OAuth server:
+ * 1. Generates a session ID
+ * 2. Opens browser to server's /auth/start
+ * 3. Polls /auth/poll until token is received
+ * 4. Saves refresh token to .env
+ * @returns {Promise<string>} access token
+ */
+async function serverInteractiveOAuthFlow() {
+  const sessionId = randomUUID();
+  const startUrl = `${AUTH_SERVER_URL}/auth/start?session=${sessionId}`;
+
+  process.stderr.write('\nGoogle 인증이 필요합니다. 브라우저에서 로그인해 주세요...\n');
+
+  // Open browser
+  await openBrowser(startUrl);
+  process.stderr.write(`\n브라우저가 열리지 않으면 아래 URL을 직접 열어주세요:\n${startUrl}\n\n`);
+  process.stderr.write('로그인 완료 대기 중...\n');
+
+  // Poll for token
+  const result = await pollForToken(sessionId);
+
+  // Save refresh token
+  if (result.refresh_token) {
+    saveRefreshTokenToEnv(result.refresh_token);
+    process.stderr.write('인증 완료! Refresh token이 .env에 저장되었습니다.\n\n');
+  } else {
+    process.stderr.write('인증 완료! (refresh token 없음 — 다음 실행 시 재인증 필요)\n\n');
+  }
+
+  return result.access_token;
+}
+
+/**
+ * Polls the OAuth server until the session token is ready or timeout.
+ * @param {string} sessionId
+ * @returns {Promise<{access_token: string, refresh_token?: string}>}
+ */
+async function pollForToken(sessionId) {
+  const deadline = Date.now() + AUTH_POLL_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    await sleep(AUTH_POLL_INTERVAL_MS);
+    try {
+      const resp = await fetch(`${AUTH_SERVER_URL}/auth/poll?session=${sessionId}`);
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      if (data.status === 'complete') {
+        if (!data.refresh_token && !data.access_token) {
+          throw new Error('Server returned complete status but no tokens');
+        }
+        return data;
+      }
+      if (data.status === 'expired') {
+        throw new Error('Auth session expired. Please try again.');
+      }
+      // status === 'pending' — keep polling
+    } catch (err) {
+      if (err.message.includes('expired') || err.message.includes('no tokens')) throw err;
+      // Network error — keep retrying
+    }
+  }
+
+  throw new Error('Authentication timed out (5 minutes). Please try again.');
+}
+
+/**
+ * Opens a URL in the default browser.
+ * @param {string} url
+ */
+async function openBrowser(url) {
+  const plat = platform();
+  try {
+    if (plat === 'darwin') {
+      await execAsync(`open "${url}"`);
+    } else if (plat === 'win32') {
+      await execAsync(`start "" "${url}"`);
+    } else {
+      await execAsync(`xdg-open "${url}"`);
+    }
+  } catch {
+    // Silently fail — the URL is printed to stderr as fallback
+  }
+}
+
+/**
+ * Saves a refresh token to the user-level config directory (~/.config/aible-cc/.env).
+ * This persists across all projects for the current user.
+ * @param {string} refreshToken
+ */
+function saveRefreshTokenToEnv(refreshToken) {
+  mkdirSync(USER_CONFIG_DIR, { recursive: true });
+  const envPath = resolve(USER_CONFIG_DIR, '.env');
+  const line = `GOOGLE_OAUTH_REFRESH_TOKEN=${refreshToken}`;
+
+  if (existsSync(envPath)) {
+    const content = readFileSync(envPath, 'utf8');
+    if (content.includes('GOOGLE_OAUTH_REFRESH_TOKEN=')) {
+      const updated = content.replace(/^GOOGLE_OAUTH_REFRESH_TOKEN=.*$/m, line);
+      writeFileSync(envPath, updated);
+    } else {
+      appendFileSync(envPath, `\n${line}\n`);
+    }
+  } else {
+    writeFileSync(envPath, `# aible-cc Google OAuth credentials (auto-generated)\n${line}\n`);
+  }
+
+  process.env.GOOGLE_OAUTH_REFRESH_TOKEN = refreshToken;
 }
 
 // ---------------------------------------------------------------------------
