@@ -1,4 +1,4 @@
-# aible-cc: 강의 콘텐츠 생성 플러그인
+# contents-ax: 강의 콘텐츠 생성 플러그인
 
 Claude Code용 강의 스토리라인 및 스크립트 생성 워크플로우 플러그인입니다.
 
@@ -22,10 +22,10 @@ Claude Code 안에서 실행:
 ### 2. 플러그인 설치
 
 ```
-/plugin install aible-cc@letsur-dev-cc-aible
+/plugin install contents-ax@letsur-dev-cc-aible
 ```
 
-또는 `/plugin` → **Discover** 탭에서 `aible-cc`를 선택하여 설치합니다.
+또는 `/plugin` → **Discover** 탭에서 `contents-ax`를 선택하여 설치합니다.
 
 **설치 범위:**
 
@@ -56,11 +56,12 @@ Claude Code 안에서 실행:
 **파이프라인:**
 
 ```
-Phase 1: 인터뷰    → 주제, 학습 목표, 대상 청중, 분량 등 수집
-Phase 2: 작성      → 스토리라인 초안 생성
-Phase 3: 리뷰 루프  → 품질 점수 기반 자동 리비전 (최대 3회)
-Phase 4: 레드팀     → 구조, 논리, 실용성 비판적 분석 (선택)
-Phase 5: 최종 승인  → 확정 또는 추가 수정
+Phase 1: 인터뷰       → 주제, 학습 목표, 대상 청중, 분량 등 수집
+Phase 2: 작성         → 스토리라인 초안 생성
+Phase 3: 리뷰 루프    → 품질 점수 기반 자동 리비전 (최대 3회)
+Phase 4: 레드팀       → 구조, 논리, 실용성 비판적 분석 (선택)
+Phase 5: 최종 승인    → 확정 또는 추가 수정
+Phase 6: 슬라이드 분할 → 스토리라인을 슬라이드 단위로 분할
 ```
 
 **출력:**
@@ -68,6 +69,7 @@ Phase 5: 최종 승인  → 확정 또는 추가 수정
 ```
 storylines/<강의 제목>/
 ├── storyline.md    ← 최종 스토리라인
+├── slides.md       ← 슬라이드 분할 결과
 └── history.md      ← 리뷰 점수, 피드백, 수정 이력
 ```
 
@@ -126,7 +128,7 @@ lectures/<강의 제목>/
 3. 권한 승인
 4. "인증 완료" 페이지 확인 후 브라우저 닫기
 
-인증 정보는 `~/.config/aible-cc/.env`에 저장되어 **모든 프로젝트에서 자동으로 재사용**됩니다.
+인증 정보는 `~/.config/contents-ax/.env`에 저장되어 **모든 프로젝트에서 자동으로 재사용**됩니다.
 
 ### 수동 인증 (대안)
 
@@ -164,13 +166,14 @@ export GOOGLE_OAUTH_REFRESH_TOKEN="..."
 ## 프로젝트 구조
 
 ```
-plugins/aible-cc/
+plugins/contents-ax/
 ├── .claude-plugin/
 │   └── plugin.json         ← 플러그인 매니페스트
 ├── agents/                 ← AI 에이전트 정의
 │   ├── storyline-writer.md
 │   ├── storyline-reviewer.md
 │   ├── storyline-red-team.md
+│   ├── storyline-slide-splitter.md
 │   ├── lecture-script-describer.md
 │   ├── lecture-script-writer.md
 │   ├── lecture-script-reviewer.md

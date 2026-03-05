@@ -1,5 +1,5 @@
 {
-  "name": "aible-marketplace",
+  "name": "cc-aible",
   "owner": {
     "name": "Donghyun Nam"
   },
@@ -9,8 +9,8 @@
   },
   "plugins": [
     {
-      "name": "aible-cc",
-      "source": "./plugins/aible-cc",
+      "name": "contents-ax",
+      "source": "./plugins/contents-ax",
       "description": "강의 스토리라인 및 스크립트 생성 워크플로우 (인터뷰 → 작성 → 리뷰 → 레드팀 → 승인)",
       "version": "0.1.0",
       "category": "education",

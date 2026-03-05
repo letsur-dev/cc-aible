@@ -14,7 +14,7 @@ import { promisify } from 'node:util';
 import { platform } from 'node:os';
 
 // User-level config directory for persisting credentials across projects
-const USER_CONFIG_DIR = resolve(homedir(), '.config', 'aible-cc');
+const USER_CONFIG_DIR = resolve(homedir(), '.config', 'contents-ax');
 
 const execAsync = promisify(execCb);
 
@@ -60,7 +60,7 @@ function parseEnvFile(envPath) {
 
 /**
  * Loads .env files in priority order:
- * 1. User-level (~/.config/aible-cc/.env) — shared across all projects
+ * 1. User-level (~/.config/contents-ax/.env) — shared across all projects
  * 2. Project-level (./.env) — project-specific override
  */
 function loadEnvFiles() {
@@ -80,10 +80,10 @@ Authentication (checked in priority order):
      GOOGLE_SLIDES_ACCESS_TOKEN
      GOOGLE_SERVICE_ACCOUNT_JSON
      GOOGLE_APPLICATION_CREDENTIALS
-  2. Saved refresh token (~/.config/aible-cc/.env from previous login)
+  2. Saved refresh token (~/.config/contents-ax/.env from previous login)
   3. Interactive OAuth via server: opens browser for Google login (first-time)
 
-Credentials are saved to ~/.config/aible-cc/.env (user-level, shared across projects).
+Credentials are saved to ~/.config/contents-ax/.env (user-level, shared across projects).
 
 Output:
   lectures/{title}/assets/slide_{n}.png   Slide thumbnail images
@@ -371,7 +371,7 @@ async function openBrowser(url) {
 }
 
 /**
- * Saves a refresh token to the user-level config directory (~/.config/aible-cc/.env).
+ * Saves a refresh token to the user-level config directory (~/.config/contents-ax/.env).
  * This persists across all projects for the current user.
  * @param {string} refreshToken
  */
@@ -389,7 +389,7 @@ function saveRefreshTokenToEnv(refreshToken) {
       appendFileSync(envPath, `\n${line}\n`);
     }
   } else {
-    writeFileSync(envPath, `# aible-cc Google OAuth credentials (auto-generated)\n${line}\n`);
+    writeFileSync(envPath, `# contents-ax Google OAuth credentials (auto-generated)\n${line}\n`);
   }
 
   process.env.GOOGLE_OAUTH_REFRESH_TOKEN = refreshToken;
