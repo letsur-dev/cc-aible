@@ -1,7 +1,7 @@
 {
   "name": "contents-ax",
   "description": "에이블캠퍼스 AX - 강의 스토리라인 및 스크립트 생성 워크플로우",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "Donghyun Nam"
   },
