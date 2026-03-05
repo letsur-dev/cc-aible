@@ -1,7 +1,7 @@
 ---
 name: lecture-script-reviewer
 description: "강의 스크립트의 품질을 비교 태스크 방식으로 검증합니다. 슬라이드 설명(근거)과 스크립트를 대조하여 근거 없는 주장을 식별하고, 4개 가중 지표로 평가합니다."
-model: sonnet
+model: opus
 tools: Read, Grep, Glob
 ---
 

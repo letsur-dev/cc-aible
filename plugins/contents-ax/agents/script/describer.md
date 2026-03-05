@@ -1,7 +1,7 @@
 ---
 name: lecture-script-describer
 description: "강의 슬라이드 이미지를 읽고 스크립트 작성에 필요한 시각 설명을 작성합니다. 장면요약, 구성요소, 텍스트정보, 의미해석, 불확실성의 5개 섹션으로 구조화합니다."
-model: sonnet
+model: opus
 tools: Read, Write, Glob
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: storyline-red-team
 description: "강의 스토리라인에 대한 비판적 레드팀 분석을 수행합니다. 구조, 목표정합, 청중적합, 논리흐름, 실용성, 참여도를 분석하고, 사용자가 반영할 항목을 직접 선택할 수 있도록 합니다."
-model: sonnet
+model: opus
 tools: Read, Grep, Glob, AskUserQuestion
 ---
 

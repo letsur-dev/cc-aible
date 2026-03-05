@@ -1,7 +1,7 @@
 ---
 name: lecture-script-red-team
 description: "강의 스크립트에 대한 비판적 레드팀 분석을 수행합니다. 시각정합, 논리흐름, 청중적합, 전환품질, 전달효과, 사실정확을 분석하여 severity 순으로 정렬된 JSON 피드백을 반환합니다."
-model: sonnet
+model: opus
 tools: Read, Grep, Glob
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: lecture-script-writer
 description: "슬라이드 시각 설명을 기반으로 강의 스크립트를 작성합니다. 권위 있는 석학의 어조로 Top-down 전개하며, 리뷰어 피드백을 반영한 리비전도 수행합니다."
-model: sonnet
+model: opus
 tools: Read, Write, Grep, Glob
 ---
 

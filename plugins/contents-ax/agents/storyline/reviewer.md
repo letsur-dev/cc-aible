@@ -1,7 +1,7 @@
 ---
 name: storyline-reviewer
 description: "강의 스토리라인의 품질을 5개 지표로 평가하고, 구조화된 점수와 실행 가능한 피드백을 반환합니다. 스토리라인 워크플로우의 품질 게이트로 사용됩니다."
-model: sonnet
+model: opus
 tools: Read, Grep, Glob
 ---
 

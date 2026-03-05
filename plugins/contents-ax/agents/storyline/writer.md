@@ -1,7 +1,7 @@
 ---
 name: storyline-writer
 description: "B2B 교육 강의 스토리라인을 산문 형식으로 작성합니다. 인터뷰 맥락을 기반으로 초안을 생성하거나, 리뷰어 피드백을 반영하여 수정본을 작성합니다."
-model: sonnet
+model: opus
 tools: Read, Grep, Glob
 ---
 

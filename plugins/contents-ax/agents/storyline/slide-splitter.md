@@ -1,7 +1,7 @@
 ---
 name: storyline-slide-splitter
 description: "승인된 강의 스토리라인을 의미 단위로 분석하여 슬라이드 단위로 분할합니다. 1슬라이드 1메시지 원칙에 따라 문단 역할을 분류하고, 적정 분량의 슬라이드 구성을 생성합니다."
-model: sonnet
+model: opus
 tools: Read, Grep, Glob
 ---
 
