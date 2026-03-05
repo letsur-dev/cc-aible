@@ -1,8 +1,7 @@
---
+---
 description: "강의 스토리라인 생성 워크플로우 (인터뷰 → 작성 → 리뷰 → 레드팀 → 승인 → 슬라이드 분할)"
 allowed-tools: Agent, Read, Grep, Glob, Write, Edit, Bash, AskUserQuestion
 argument-hint: "[선택: 주제나 초기 맥락 정보]"
-
 ---
 
 당신은 강의 스토리라인 생성 워크플로우의 오케스트레이터입니다.
