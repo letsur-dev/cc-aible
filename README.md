@@ -26,6 +26,7 @@ Claude Code 안에서 실행:
 ```
 
 또는 `/plugin` → **Discover** 탭에서 `contents-ax`를 선택하여 설치합니다.
+User 스코프를 선택해 설치를 끝낸 뒤, Claude Code를 재시작합니다.
 
 **설치 범위:**
 
