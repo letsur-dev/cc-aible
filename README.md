@@ -169,21 +169,24 @@ export GOOGLE_OAUTH_REFRESH_TOKEN="..."
 ```
 plugins/contents-ax/
 ├── .claude-plugin/
-│   └── plugin.json         ← 플러그인 매니페스트
-├── agents/                 ← AI 에이전트 정의
-│   ├── storyline-writer.md
-│   ├── storyline-reviewer.md
-│   ├── storyline-red-team.md
-│   ├── storyline-slide-splitter.md
-│   ├── lecture-script-describer.md
-│   ├── lecture-script-writer.md
-│   ├── lecture-script-reviewer.md
-│   └── lecture-script-red-team.md
-├── commands/               ← 워크플로우 커맨드
+│   └── plugin.json            ← 플러그인 매니페스트
+├── agents/
+│   ├── storyline/             ← 스토리라인 에이전트
+│   │   ├── writer.md
+│   │   ├── reviewer.md
+│   │   ├── red-team.md
+│   │   └── slide-splitter.md
+│   └── script/                ← 강의 스크립트 에이전트
+│       ├── writer.md
+│       ├── reviewer.md
+│       ├── red-team.md
+│       └── describer.md
+├── commands/                  ← 워크플로우 커맨드
 │   ├── storyline.md
 │   └── lecture-script.md
-├── prompts/                ← 프롬프트 템플릿
-└── scripts/                ← 유틸리티 스크립트
+├── prompts/                   ← 공유 프롬프트
+│   └── interviewer.md
+└── scripts/                   ← 유틸리티 스크립트
     └── download-slides.mjs
 ```
 

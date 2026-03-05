@@ -1,19 +1,19 @@
 {
   "name": "contents-ax",
   "description": "에이블캠퍼스 AX - 강의 스토리라인 및 스크립트 생성 워크플로우",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": {
     "name": "Donghyun Nam"
   },
   "agents": [
-    "./agents/storyline-writer.md",
-    "./agents/storyline-reviewer.md",
-    "./agents/storyline-red-team.md",
-    "./agents/lecture-script-describer.md",
-    "./agents/lecture-script-writer.md",
-    "./agents/lecture-script-reviewer.md",
-    "./agents/lecture-script-red-team.md",
-    "./agents/storyline-slide-splitter.md"
+    "./agents/storyline/writer.md",
+    "./agents/storyline/reviewer.md",
+    "./agents/storyline/red-team.md",
+    "./agents/storyline/slide-splitter.md",
+    "./agents/script/writer.md",
+    "./agents/script/reviewer.md",
+    "./agents/script/red-team.md",
+    "./agents/script/describer.md"
   ],
   "commands": ["./commands/storyline.md", "./commands/lecture-script.md"]
 }
