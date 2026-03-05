@@ -1,9 +1,6 @@
 # OS
 .DS_Store
 
-# Credentials
-.env
-
 # Claude
 .claude/
 .omc/

@@ -8,6 +8,7 @@
       "Agent(lecture-script-writer)",
       "Agent(lecture-script-reviewer)",
       "Agent(lecture-script-red-team)",
+      "Agent(storyline-slide-splitter)",
       "Bash(node:${CLAUDE_PLUGIN_ROOT}/scripts/*)"
     ]
   }

@@ -12,7 +12,8 @@
     "./agents/lecture-script-describer.md",
     "./agents/lecture-script-writer.md",
     "./agents/lecture-script-reviewer.md",
-    "./agents/lecture-script-red-team.md"
+    "./agents/lecture-script-red-team.md",
+    "./agents/storyline-slide-splitter.md"
   ],
   "commands": ["./commands/storyline.md", "./commands/lecture-script.md"]
 }
